@@ -1,0 +1,12 @@
+{
+  "component_id": "com.shop.payment.LegacyPaymentService",
+  "repo_id": "acme/shop",
+  "snapshot": "3f2a9c1e8b7d6a5f4e3d2c1b0a9f8e7d6c5b4a39",
+  "simple_name": "LegacyPaymentService",
+  "package": "com.shop.payment",
+  "kind": "CLASS",
+  "file_path": "payment-service/src/main/java/com/shop/payment/LegacyPaymentService.java",
+  "module": "payment-service",
+  "is_test": false,
+  "loc": 214
+}

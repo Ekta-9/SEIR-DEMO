@@ -1,0 +1,9 @@
+{
+  "repo_id": "acme/shop",
+  "snapshot": "3f2a9c1e8b7d6a5f4e3d2c1b0a9f8e7d6c5b4a39",
+  "source_id": "com.shop.checkout.CheckoutController",
+  "target_id": "com.shop.payment.LegacyPaymentService",
+  "edge_type": "CALLS",
+  "count": 3,
+  "evidence_ids": []
+}

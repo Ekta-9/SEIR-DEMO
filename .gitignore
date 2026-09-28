@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+
+# Data produced by the pipeline (large / regenerable)
+seir-evidence/data/
+seir-evidence/workspace/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

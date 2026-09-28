@@ -1,0 +1,101 @@
+{
+  "$defs": {
+    "ChangeAction": {
+      "enum": [
+        "MODIFY",
+        "DELETE",
+        "DEPRECATE"
+      ],
+      "title": "ChangeAction",
+      "type": "string"
+    },
+    "GroundedClaim": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text",
+        "evidence_ids"
+      ],
+      "title": "GroundedClaim",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "component_id": {
+      "pattern": "^[A-Za-z_$][\\w$]*(\\.[A-Za-z_$][\\w$]*)*$",
+      "title": "Component Id",
+      "type": "string"
+    },
+    "action": {
+      "$ref": "#/$defs/ChangeAction"
+    },
+    "summary": {
+      "title": "Summary",
+      "type": "string"
+    },
+    "claims": {
+      "items": {
+        "$ref": "#/$defs/GroundedClaim"
+      },
+      "title": "Claims",
+      "type": "array"
+    },
+    "uncertainties": {
+      "items": {
+        "$ref": "#/$defs/GroundedClaim"
+      },
+      "title": "Uncertainties",
+      "type": "array"
+    },
+    "recommendation": {
+      "title": "Recommendation",
+      "type": "string"
+    },
+    "checklist": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Checklist",
+      "type": "array"
+    },
+    "generator": {
+      "examples": [
+        "template@0.1.0",
+        "ollama:llama3.1:8b"
+      ],
+      "title": "Generator",
+      "type": "string"
+    },
+    "validated": {
+      "description": "True once every claim passed the evidence checker",
+      "title": "Validated",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "component_id",
+    "action",
+    "summary",
+    "recommendation",
+    "generator",
+    "validated"
+  ],
+  "title": "Explanation",
+  "type": "object",
+  "$id": "seir/explanation/1.0.0"
+}

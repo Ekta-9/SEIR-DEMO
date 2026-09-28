@@ -1,0 +1,98 @@
+{
+  "$defs": {
+    "ComponentKind": {
+      "enum": [
+        "CLASS",
+        "INTERFACE",
+        "ENUM",
+        "RECORD",
+        "ANNOTATION"
+      ],
+      "title": "ComponentKind",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One top-level Java type (class/interface/enum/record/annotation).",
+  "properties": {
+    "component_id": {
+      "examples": [
+        "com.shop.payment.LegacyPaymentService"
+      ],
+      "pattern": "^[A-Za-z_$][\\w$]*(\\.[A-Za-z_$][\\w$]*)*$",
+      "title": "Component Id",
+      "type": "string"
+    },
+    "repo_id": {
+      "pattern": "^[\\w.-]+/[\\w.-]+$",
+      "title": "Repo Id",
+      "type": "string"
+    },
+    "snapshot": {
+      "description": "Commit the component was extracted from",
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Snapshot",
+      "type": "string"
+    },
+    "simple_name": {
+      "title": "Simple Name",
+      "type": "string"
+    },
+    "package": {
+      "description": "Empty string for the default package",
+      "title": "Package",
+      "type": "string"
+    },
+    "kind": {
+      "$ref": "#/$defs/ComponentKind"
+    },
+    "file_path": {
+      "description": "Repo-relative POSIX path, e.g. 'src/main/java/com/shop/Foo.java'",
+      "title": "File Path",
+      "type": "string"
+    },
+    "module": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Build module for multi-module repos, else null",
+      "title": "Module"
+    },
+    "is_test": {
+      "default": false,
+      "title": "Is Test",
+      "type": "boolean"
+    },
+    "loc": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Loc"
+    }
+  },
+  "required": [
+    "component_id",
+    "repo_id",
+    "snapshot",
+    "simple_name",
+    "package",
+    "kind",
+    "file_path"
+  ],
+  "title": "Component",
+  "type": "object",
+  "$id": "seir/component/1.0.0"
+}

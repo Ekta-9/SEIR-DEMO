@@ -1,0 +1,127 @@
+{
+  "$defs": {
+    "ChangeAction": {
+      "enum": [
+        "MODIFY",
+        "DELETE",
+        "DEPRECATE"
+      ],
+      "title": "ChangeAction",
+      "type": "string"
+    },
+    "FeatureContribution": {
+      "additionalProperties": false,
+      "properties": {
+        "feature": {
+          "examples": [
+            "recent_commit_count"
+          ],
+          "title": "Feature",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "contribution": {
+          "description": "Signed attribution (e.g. SHAP); positive pushes risk up",
+          "title": "Contribution",
+          "type": "number"
+        }
+      },
+      "required": [
+        "feature",
+        "value",
+        "contribution"
+      ],
+      "title": "FeatureContribution",
+      "type": "object"
+    },
+    "RiskClass": {
+      "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH"
+      ],
+      "title": "RiskClass",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "repo_id": {
+      "pattern": "^[\\w.-]+/[\\w.-]+$",
+      "title": "Repo Id",
+      "type": "string"
+    },
+    "component_id": {
+      "pattern": "^[A-Za-z_$][\\w$]*(\\.[A-Za-z_$][\\w$]*)*$",
+      "title": "Component Id",
+      "type": "string"
+    },
+    "action": {
+      "$ref": "#/$defs/ChangeAction"
+    },
+    "risk_class": {
+      "$ref": "#/$defs/RiskClass"
+    },
+    "class_scores": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "description": "Per-class score in [0, 1], summing to 1",
+      "propertyNames": {
+        "$ref": "#/$defs/RiskClass"
+      },
+      "title": "Class Scores",
+      "type": "object"
+    },
+    "is_calibrated": {
+      "description": "True only if scores were calibrated and may be read as probabilities (report \u00a714.5)",
+      "title": "Is Calibrated",
+      "type": "boolean"
+    },
+    "top_features": {
+      "items": {
+        "$ref": "#/$defs/FeatureContribution"
+      },
+      "title": "Top Features",
+      "type": "array"
+    },
+    "model_version": {
+      "examples": [
+        "xgb-risk@0.1.0"
+      ],
+      "title": "Model Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "repo_id",
+    "component_id",
+    "action",
+    "risk_class",
+    "class_scores",
+    "is_calibrated",
+    "model_version"
+  ],
+  "title": "RiskAssessment",
+  "type": "object",
+  "$id": "seir/risk_assessment/1.0.0"
+}

@@ -1,0 +1,71 @@
+{
+  "$defs": {
+    "EdgeType": {
+      "enum": [
+        "IMPORTS",
+        "CALLS",
+        "EXTENDS",
+        "IMPLEMENTS",
+        "INSTANTIATES",
+        "FIELD_TYPE",
+        "ANNOTATED_BY",
+        "CONFIG_REF",
+        "RUNTIME_CALL",
+        "CO_CHANGE"
+      ],
+      "title": "EdgeType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Directed edge: `source_id` depends on `target_id`.",
+  "properties": {
+    "repo_id": {
+      "pattern": "^[\\w.-]+/[\\w.-]+$",
+      "title": "Repo Id",
+      "type": "string"
+    },
+    "snapshot": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Snapshot",
+      "type": "string"
+    },
+    "source_id": {
+      "pattern": "^[A-Za-z_$][\\w$]*(\\.[A-Za-z_$][\\w$]*)*$",
+      "title": "Source Id",
+      "type": "string"
+    },
+    "target_id": {
+      "pattern": "^[A-Za-z_$][\\w$]*(\\.[A-Za-z_$][\\w$]*)*$",
+      "title": "Target Id",
+      "type": "string"
+    },
+    "edge_type": {
+      "$ref": "#/$defs/EdgeType"
+    },
+    "count": {
+      "default": 1,
+      "description": "How many occurrences support this edge",
+      "minimum": 1,
+      "title": "Count",
+      "type": "integer"
+    },
+    "evidence_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidence Ids",
+      "type": "array"
+    }
+  },
+  "required": [
+    "repo_id",
+    "snapshot",
+    "source_id",
+    "target_id",
+    "edge_type"
+  ],
+  "title": "DependencyEdge",
+  "type": "object",
+  "$id": "seir/dependency_edge/1.0.0"
+}

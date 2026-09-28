@@ -1,0 +1,13 @@
+{
+  "repo_id": "acme/shop",
+  "component_id": "com.shop.payment.LegacyPaymentService",
+  "action": "DELETE",
+  "risk_class": "MEDIUM",
+  "class_scores": {"LOW": 0.2, "MEDIUM": 0.55, "HIGH": 0.25},
+  "is_calibrated": false,
+  "top_features": [
+    {"feature": "config_reference_count", "value": 2, "contribution": 0.18},
+    {"feature": "recent_commit_count", "value": 2, "contribution": -0.07}
+  ],
+  "model_version": "xgb-risk@0.1.0"
+}

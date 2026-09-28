@@ -1,0 +1,19 @@
+{
+  "component_id": "com.shop.payment.LegacyPaymentService",
+  "action": "DELETE",
+  "summary": "Rarely changed and no runtime data is available, but a configuration file still references it.",
+  "claims": [
+    {"text": "It changed 2 times in the last 90 days.", "evidence_ids": ["ev_example_git_recent"]},
+    {"text": "application.yml line 42 references it as a bean class.", "evidence_ids": ["ev_example_config_ref"]}
+  ],
+  "uncertainties": [
+    {"text": "No runtime data exists, so actual usage is unknown.", "evidence_ids": ["ev_example_runtime"]}
+  ],
+  "recommendation": "Remove the configuration reference and confirm no external callers before deleting.",
+  "checklist": [
+    "Review payment-service/src/main/resources/application.yml line 42",
+    "Confirm no external system calls LegacyPaymentService"
+  ],
+  "generator": "template@0.1.0",
+  "validated": true
+}

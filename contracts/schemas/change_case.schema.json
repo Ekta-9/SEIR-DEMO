@@ -1,0 +1,120 @@
+{
+  "$defs": {
+    "ChangeAction": {
+      "enum": [
+        "MODIFY",
+        "DELETE",
+        "DEPRECATE"
+      ],
+      "title": "ChangeAction",
+      "type": "string"
+    },
+    "RiskClass": {
+      "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH"
+      ],
+      "title": "RiskClass",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "case_id": {
+      "title": "Case Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "repo_id": {
+      "pattern": "^[\\w.-]+/[\\w.-]+$",
+      "title": "Repo Id",
+      "type": "string"
+    },
+    "commit_sha": {
+      "description": "The change being labelled",
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Commit Sha",
+      "type": "string"
+    },
+    "parent_sha": {
+      "description": "Pre-change snapshot used for features",
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Parent Sha",
+      "type": "string"
+    },
+    "as_of": {
+      "description": "Feature cutoff: the change commit's timestamp",
+      "format": "date-time",
+      "title": "As Of",
+      "type": "string"
+    },
+    "target_component_id": {
+      "pattern": "^[A-Za-z_$][\\w$]*(\\.[A-Za-z_$][\\w$]*)*$",
+      "title": "Target Component Id",
+      "type": "string"
+    },
+    "action": {
+      "$ref": "#/$defs/ChangeAction"
+    },
+    "impacted_component_ids": {
+      "description": "Other components that actually had to change",
+      "items": {
+        "type": "string"
+      },
+      "title": "Impacted Component Ids",
+      "type": "array"
+    },
+    "fix_commit_shas": {
+      "description": "Follow-up fix commits linked to this change",
+      "items": {
+        "type": "string"
+      },
+      "title": "Fix Commit Shas",
+      "type": "array"
+    },
+    "label": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RiskClass"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "None until the labelling rules are applied"
+    },
+    "label_rule_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "examples": [
+        "labels@1.0"
+      ],
+      "title": "Label Rule Version"
+    }
+  },
+  "required": [
+    "case_id",
+    "repo_id",
+    "commit_sha",
+    "parent_sha",
+    "as_of",
+    "target_component_id",
+    "action"
+  ],
+  "title": "ChangeCase",
+  "type": "object",
+  "$id": "seir/change_case/1.0.0"
+}

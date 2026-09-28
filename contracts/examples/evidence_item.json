@@ -1,0 +1,48 @@
+[
+  {
+    "repo_id": "acme/shop",
+    "snapshot": "3f2a9c1e8b7d6a5f4e3d2c1b0a9f8e7d6c5b4a39",
+    "component_id": "com.shop.payment.LegacyPaymentService",
+    "source": "GIT",
+    "evidence_type": "recent_commit_count",
+    "value": 2,
+    "unit": "commits",
+    "availability": "AVAILABLE",
+    "as_of": "2026-09-01T00:00:00Z",
+    "window": {"start": "2026-06-03T00:00:00Z", "end": "2026-09-01T00:00:00Z"},
+    "provenance": {
+      "commits": [
+        "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+        "0f1e2d3c4b5a69788796a5b4c3d2e1f001234567"
+      ]
+    },
+    "extraction_method": "git_history@0.1.0"
+  },
+  {
+    "repo_id": "acme/shop",
+    "snapshot": "3f2a9c1e8b7d6a5f4e3d2c1b0a9f8e7d6c5b4a39",
+    "component_id": "com.shop.payment.LegacyPaymentService",
+    "source": "CONFIG",
+    "evidence_type": "config_reference",
+    "value": "BEAN_CLASS",
+    "availability": "AVAILABLE",
+    "as_of": "2026-09-01T00:00:00Z",
+    "provenance": {
+      "files": [{"path": "payment-service/src/main/resources/application.yml", "line": 42}],
+      "note": "payments.legacy.impl: com.shop.payment.LegacyPaymentService"
+    },
+    "extraction_method": "config_files@0.1.0"
+  },
+  {
+    "repo_id": "acme/shop",
+    "snapshot": "3f2a9c1e8b7d6a5f4e3d2c1b0a9f8e7d6c5b4a39",
+    "component_id": "com.shop.payment.LegacyPaymentService",
+    "source": "RUNTIME",
+    "evidence_type": "observed_use",
+    "value": null,
+    "availability": "UNAVAILABLE",
+    "as_of": "2026-09-01T00:00:00Z",
+    "provenance": {"note": "no runtime data uploaded for this repository"},
+    "extraction_method": "runtime_usage@0.1.0"
+  }
+]

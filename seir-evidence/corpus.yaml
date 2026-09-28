@@ -1,0 +1,31 @@
+# Candidate repositories for SEIR experiments (Java only).
+# Status: proposed in Phase 1; history size and build layout are verified in Phase 2.
+#
+# Selection criteria (Data & Evolution report §4): Java, long Git history,
+# identifiable components, licence allows academic use, and — for some repos —
+# configuration/runtime evidence.
+
+repositories:
+  - repo_id: spring-projects/spring-petclinic
+    url: https://github.com/spring-projects/spring-petclinic
+    licence: Apache-2.0
+    roles: [demo, runtime_lab, config]
+    why: Small Spring Boot app we can run with OpenTelemetry + Locust for ground-truth runtime data.
+
+  - repo_id: spring-petclinic/spring-petclinic-microservices
+    url: https://github.com/spring-petclinic/spring-petclinic-microservices
+    licence: Apache-2.0
+    roles: [config, multi_module]
+    why: Config-heavy (Spring Cloud, many application.yml files); tests module/multi-module handling.
+
+  - repo_id: apache/commons-lang
+    url: https://github.com/apache/commons-lang
+    licence: Apache-2.0
+    roles: [git_history, dataset]
+    why: Long, clean history with many real changes and linked JIRA fix commits — good for labels.
+
+  - repo_id: apache/commons-io
+    url: https://github.com/apache/commons-io
+    licence: Apache-2.0
+    roles: [git_history, dataset, holdout]
+    why: Same style as commons-lang; held out entirely as the unseen-repository test set.
