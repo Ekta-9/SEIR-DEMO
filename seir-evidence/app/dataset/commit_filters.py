@@ -30,6 +30,9 @@ _COSMETIC_PHRASES = (
     r"unused\s+imports?", r"organi[sz]e\s+imports", r"wildcard\s+imports?",
     r"(fix(ed)?|remove[ds]?)\s+imports?\b", r"licen[cs]e", r"sort(ed)?\s+members",
     r"use\s+final", r"final\s+(keyword|modifier)s?",
+    # found in the SZZ review sample: "removed lots of finals"
+    r"(remov(e[ds]?|ing)|add(ed|ing)?)\s+(lots\s+of\s+|some\s+|unnecessary\s+|redundant\s+)?finals?\b",
+    r"(unnecessary|redundant)\s+finals?\b",
 )
 COSMETIC_PATTERN = re.compile(r"\b(" + "|".join(_COSMETIC_PHRASES) + r")", re.IGNORECASE)
 
@@ -43,10 +46,19 @@ BUG_FIX_PATTERN = re.compile(
 )
 
 
+# Chinese subjects (27 % of macrozheng/mall). `\b` word boundaries do not work
+# for CJK text (no spaces between words), so these are plain substrings:
+# 修复 fix/repair, 修正 correct, 解决 solve. 问题 "problem" and 异常 "exception"
+# alone are excluded: mentioning a problem is not fixing one.
+BUG_FIX_PATTERN_CJK = re.compile(r"修复|修正|解决")
+COSMETIC_PATTERN_CJK = re.compile(r"注释|格式化|代码格式|错别字")  # comments, formatting, typos
+
+
 def is_cosmetic(subject: str) -> bool:
-    return bool(COSMETIC_PATTERN.search(subject))
+    return bool(COSMETIC_PATTERN.search(subject) or COSMETIC_PATTERN_CJK.search(subject))
 
 
 def is_bug_fix(subject: str) -> bool:
     """A bug fix mentions fixing something and is not a cosmetic change."""
-    return bool(BUG_FIX_PATTERN.search(subject)) and not is_cosmetic(subject)
+    mentions_fix = BUG_FIX_PATTERN.search(subject) or BUG_FIX_PATTERN_CJK.search(subject)
+    return bool(mentions_fix) and not is_cosmetic(subject)

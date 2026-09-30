@@ -7,7 +7,8 @@ from app.collectors.git_history import GitHistoryIndex
 from app.collectors.git_log import read_history
 from app.config import Settings
 from app.dataset.cases import BULK_COMMIT, CENSORED, COSMETIC_COMMIT, NEW_COMPONENT, mine_cases
-from app.dataset.features import ACTION_FEATURE, git_feature_row
+from app.dataset.features import feature_row
+from seir_features import ACTION_FEATURE
 from app.dataset.labels import assign_label
 from app.dataset.splits import HOLDOUT, TEST, TRAIN, VALIDATION, assign_splits
 from app.dataset.szz import faulty_lines, find_bug_inducing, to_ranges
@@ -109,7 +110,7 @@ def test_mining_labels_and_szz(repo):
     assert (bad_change, f"{PKG}.Calc") in inducing  # SZZ blames the refactor
     assert (bad_change, f"{PKG}.Report") not in inducing  # Report's lines were not the bug
 
-    row = git_feature_row(index, calc, settings)
+    row = feature_row(index, calc, [], settings)
     assert row["git_historical_commit_count"] == 1  # only the creating commit; not the change itself
     assert row[ACTION_FEATURE] == 0
 
@@ -163,3 +164,39 @@ def test_splits_are_chronological_and_keep_commits_together():
     assert a.loc[a["split"] == VALIDATION, "as_of"].max() < a.loc[a["split"] == TEST, "as_of"].min()
     assert split.iloc[19] == split.iloc[20]  # same commit time -> same split
     assert (split[df["repo_id"] == "b/b"] == HOLDOUT).all()
+
+
+
+# ---- per-repository cap ---------------------------------------------------------------
+
+def test_sample_by_commit_keeps_whole_commits_and_is_reproducible():
+    from app.dataset.cases import CandidateCase, sample_by_commit
+    cases = [
+        CandidateCase("a/a", f"{n:040x}", "0" * 40, day(n), f"{PKG}.C{k}", f"{SRC}/C{k}.java",
+                      ChangeAction.MODIFY, (), 0)
+        for n in range(50) for k in range(n % 3 + 1)  # commits with 1-3 cases each
+    ]
+    first = sample_by_commit(cases, 40, seed=42)
+    assert len(first) <= 40
+    assert first == sample_by_commit(cases, 40, seed=42)  # deterministic
+    kept_commits = {c.commit_sha for c in first}
+    assert all(sum(c.commit_sha == sha for c in cases) == sum(c.commit_sha == sha for c in first)
+               for sha in kept_commits)  # never half a commit
+    years = sorted(c.as_of for c in first)
+    assert years[0] < day(15) and years[-1] > day(35)  # spread over the whole history
+    assert sample_by_commit(cases, 10_000, seed=42) == cases  # under the cap: untouched
+
+
+def test_build_dataset_still_accepts_plain_urls(monkeypatch, tmp_path):
+    """Member 3's build_dataset_v2.py passes a list of URLs (the original API)."""
+    from app.dataset import build as build_module
+    seen = []
+
+    def fake_build_repository(url, settings, max_cases=None, ref=None):
+        seen.append((url, max_cases, ref))
+        raise StopIteration  # stop right after the call we want to observe
+
+    monkeypatch.setattr(build_module, "build_repository", fake_build_repository)
+    with pytest.raises(StopIteration):
+        build_module.build_dataset(["https://github.com/acme/shop"], set(), Settings(data_dir=tmp_path), "t")
+    assert seen == [("https://github.com/acme/shop", None, None)]

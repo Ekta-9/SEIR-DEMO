@@ -147,6 +147,10 @@ class GitHistoryIndex:
         before = self._touches_before(component_id, as_of)
         return bool(before) and not before[-1].removes_component
 
+    def alive_components(self, as_of: datetime) -> set[str]:
+        """Every component that existed just before `as_of`."""
+        return {c for c in self._touches if self.is_alive(c, as_of)}
+
     def features(self, component_id: str, as_of: datetime) -> GitFeatures:
         """Features using only commits strictly before `as_of` (no leakage)."""
         before = self._touches_before(component_id, as_of)

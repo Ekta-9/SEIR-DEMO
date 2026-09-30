@@ -5,6 +5,7 @@ modified or deleted by it. Every rejected candidate is counted under a named
 exclusion reason so the dataset report can document what was dropped and why.
 """
 
+import random
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from datetime import datetime
@@ -42,6 +43,26 @@ class CandidateCase:
     @property
     def case_id(self) -> str:
         return f"{self.repo_id}@{self.commit_sha[:12]}:{self.target_component_id}"
+
+
+SAMPLED_OUT = "sampled_out_repo_cap"
+
+
+def sample_by_commit(cases: list[CandidateCase], max_cases: int, seed: int) -> list[CandidateCase]:
+    """Keep at most `max_cases`, choosing WHOLE commits at random across the entire
+    history (so one large repository cannot dominate training, while the time
+    spread — needed for chronological splits — is preserved). Deterministic."""
+    if len(cases) <= max_cases:
+        return cases
+    by_commit: dict[str, int] = Counter(c.commit_sha for c in cases)
+    commits = sorted(by_commit)  # stable order before shuffling -> reproducible
+    random.Random(seed).shuffle(commits)
+    kept, total = set(), 0
+    for sha in commits:
+        if total + by_commit[sha] <= max_cases:
+            kept.add(sha)
+            total += by_commit[sha]
+    return [c for c in cases if c.commit_sha in kept]
 
 
 def find_duplicate_commits(repo_dir: Path, snapshot: str, timeout: int) -> set[str]:

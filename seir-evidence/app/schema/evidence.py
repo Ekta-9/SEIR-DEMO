@@ -62,6 +62,10 @@ EVIDENCE_TYPES: dict[Source, frozenset[str]] = {
     }),
 }
 
+# Types where one component can have several items (e.g. one per config file
+# line). Their ID also hashes the provenance file locations, so each is unique.
+MULTI_VALUED_EVIDENCE_TYPES = frozenset({"config_reference"})
+
 EvidenceValue = bool | int | float | str | None
 
 _UTC_ADAPTER = TypeAdapter(UtcDatetime)
@@ -72,6 +76,19 @@ def _canonical_time(value: Any) -> str | None:
     if value is None:
         return None
     return _UTC_ADAPTER.validate_python(value).isoformat()
+
+
+def _canonical_locations(provenance: Any) -> str:
+    """'path:line,path:line' in sorted order, from a dict or a Provenance."""
+    if provenance is None:
+        return ""
+    files = provenance.files if isinstance(provenance, Provenance) else provenance.get("files", [])
+    locations = []
+    for location in files:
+        path, line = (location.path, location.line) if isinstance(location, FileLocation) else (
+            location.get("path"), location.get("line"))
+        locations.append(f"{path}:{line or ''}")
+    return ",".join(sorted(locations))
 
 
 class FileLocation(ContractModel):
@@ -114,19 +131,19 @@ class EvidenceItem(ContractModel):
             window = data.get("window") or {}
             if isinstance(window, TimeWindow):
                 window = window.model_dump()
-            data = {
-                **data,
-                "evidence_id": make_evidence_id(
-                    data.get("repo_id"),
-                    data.get("snapshot"),
-                    data.get("component_id"),
-                    data.get("source"),
-                    data.get("evidence_type"),
-                    _canonical_time(data.get("as_of")),
-                    _canonical_time(window.get("start")),
-                    _canonical_time(window.get("end")),
-                ),
-            }
+            parts = [
+                data.get("repo_id"),
+                data.get("snapshot"),
+                data.get("component_id"),
+                data.get("source"),
+                data.get("evidence_type"),
+                _canonical_time(data.get("as_of")),
+                _canonical_time(window.get("start")),
+                _canonical_time(window.get("end")),
+            ]
+            if data.get("evidence_type") in MULTI_VALUED_EVIDENCE_TYPES:
+                parts.append(_canonical_locations(data.get("provenance")))
+            data = {**data, "evidence_id": make_evidence_id(*parts)}
         return data
 
     @model_validator(mode="after")

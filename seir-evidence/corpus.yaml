@@ -1,5 +1,6 @@
 # Candidate repositories for SEIR experiments (Java only).
-# Status: proposed in Phase 1; history size and build layout are verified in Phase 2.
+# Dataset repositories are pinned (`ref`) to the exact commits dataset v4 was built from,
+# so `build_dataset` reproduces v4 byte-for-byte. Remove/update a `ref` only for a new version.
 #
 # Selection criteria (Data & Evolution report §4): Java, long Git history,
 # identifiable components, licence allows academic use, and — for some repos —
@@ -20,12 +21,85 @@ repositories:
 
   - repo_id: apache/commons-lang
     url: https://github.com/apache/commons-lang
+    ref: 7b6048b7a9d1339a12d353cb85b2222df7bf5668  # pinned: dataset v4
     licence: Apache-2.0
     roles: [git_history, dataset]
     why: Long, clean history with many real changes and linked JIRA fix commits — good for labels.
 
   - repo_id: apache/commons-io
     url: https://github.com/apache/commons-io
+    ref: f4fc54a131914203784c7c816817689feed22679  # pinned: dataset v4
     licence: Apache-2.0
     roles: [git_history, dataset, holdout]
-    why: Same style as commons-lang; held out entirely as the unseen-repository test set.
+    why: >-
+      Same style as commons-lang; held out entirely as an unseen-repository test set
+      (already evaluated once, in Member 3's v1 final evaluation).
+
+  # --- added in v4 at Member 3's request (they had built these into their own copy) ---
+  - repo_id: apache/commons-collections
+    url: https://github.com/apache/commons-collections
+    ref: c71d621909dc616d5709e5d3b703392d0786224b  # pinned: dataset v4
+    licence: Apache-2.0
+    roles: [git_history, dataset]
+    why: More training diversity (library; no runtime configuration).
+
+  - repo_id: apache/commons-text
+    url: https://github.com/apache/commons-text
+    ref: 6ef66a612f48f6150654601a17612759329250b6  # pinned: dataset v4
+    licence: Apache-2.0
+    roles: [git_history, dataset]
+    why: More training diversity (library; no runtime configuration).
+
+  - repo_id: apache/commons-codec
+    url: https://github.com/apache/commons-codec
+    ref: 5444a15a34dada7b6d92f6f96c58bef74cee2817  # pinned: dataset v4
+    licence: Apache-2.0
+    roles: [git_history, dataset]
+    why: More training diversity (library; no runtime configuration).
+
+  - repo_id: apache/commons-compress
+    url: https://github.com/apache/commons-compress
+    ref: f4eea9e5cf73e38cf352c0d5f85376e5bbb630b9  # pinned: dataset v4
+    licence: Apache-2.0
+    roles: [git_history, dataset]
+    why: More training diversity (library; no runtime configuration).
+
+  - repo_id: jhy/jsoup
+    url: https://github.com/jhy/jsoup
+    ref: 0dc96b3b144c2eae59bcb1d5e1b412269ee50f2b  # pinned: dataset v4
+    licence: MIT
+    roles: [git_history, dataset, holdout]
+    why: >-
+      Non-Apache library with a different development style (single lead maintainer,
+      GitHub issues). SEALED holdout: Member 3 reserved it as a never-evaluated final
+      test (commons-io was already used once in the v1 final evaluation), so it must
+      never be used for training or tuning.
+
+  # --- applications: give the configuration ablation real signal ---
+  - repo_id: apache/syncope
+    url: https://github.com/apache/syncope
+    ref: 5ef18995544eb5ff19a8e066b549ddf297f9b5b9  # pinned: dataset v4
+    licence: Apache-2.0
+    roles: [git_history, dataset, config]
+    max_cases: 5000
+    why: >-
+      Identity-management application; 1,258 cases with runtime configuration
+      references, informative JIRA-keyed commit messages, 62 authors, since 2010.
+      Capped at 5,000 cases (whole commits sampled across history) because its
+      17,285 cases would otherwise dominate training (and 77% are HIGH).
+
+  - repo_id: apache/shiro
+    url: https://github.com/apache/shiro
+    ref: bad00104d81b02bbddaa1a6347bfc8819eaa9eb2  # pinned: dataset v4
+    licence: Apache-2.0
+    roles: [git_history, dataset, config]
+    why: Security framework with Spring/INI configuration; clean history since 2005, 88 authors.
+
+  - repo_id: macrozheng/mall
+    url: https://github.com/macrozheng/mall
+    licence: Apache-2.0
+    roles: [config]
+    why: >-
+      Settings-collector demo only (799 MyBatis mapper references). Removed from the
+      dataset in v4: 2 authors and 72% "Update X.java" commit messages make its
+      risk labels unreliable (SZZ found bugs in only 1.9% of cases).

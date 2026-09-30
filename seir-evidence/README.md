@@ -24,7 +24,11 @@ python -m scripts.verify_git_history https://github.com/spring-projects/spring-p
 
 ```bash
 # build the labelled risk dataset from corpus.yaml (repos with role 'dataset')
-python -m scripts.build_dataset --version v1
+python -m scripts.build_dataset --version v2
+
+# configuration evidence: export references for manual review, then score the reviewed CSV
+python -m scripts.review_config_references https://github.com/apache/commons-lang
+python -m scripts.evaluate_config_review data/apache__commons-lang/<snapshot>/config_review.csv
 ```
 
 Dataset guide for the ML module: [docs/DATASET.md](docs/DATASET.md).
@@ -40,6 +44,7 @@ app/
   collectors/
     git_log.py       one-pass git log parsing + rename-following attribution
     git_history.py   9 Git features as of any cutoff + CO_CHANGE edges
+    config_files.py  configuration references at any revision (read from git objects)
   dataset/
     commit_filters.py  bug-fix / cosmetic commit classification
     cases.py           mine change cases + exclusion reasons
@@ -47,6 +52,7 @@ app/
     labels.py          labels@1.0 (versioned, fixed before training)
     features.py        pre-change features via the live evidence code
     splits.py          chronological + repository-holdout splits
+    config_history.py  configuration evidence at every pre-change snapshot
     quality.py         data-quality and leakage report
     build.py           orchestrates everything -> data/dataset/<version>/
   inventory.py       interim component list (until Member 4's parser is plugged in)
@@ -58,6 +64,8 @@ scripts/
   run_analysis.py         analyze a real repo
   verify_git_history.py   Phase 2 verification
   build_dataset.py        Phase 3 dataset build
+  sample_szz_links.py     SZZ links for manual review
+  review_config_references.py / evaluate_config_review.py   Phase 4 manual verification
   export_schemas.py       regenerate /contracts/schemas after changing app/schema
 tests/
 corpus.yaml          candidate repositories for experiments

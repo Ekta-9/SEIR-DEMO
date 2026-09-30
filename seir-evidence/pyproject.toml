@@ -20,9 +20,10 @@ dev = [
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
-# Explicit discovery: only `app` is code; data/ and workspace/ are generated folders.
+# Explicit discovery: `app` (the service) and `seir_features` (shared with the risk
+# model); data/ and workspace/ are generated folders.
 [tool.setuptools.packages.find]
-include = ["app*"]
+include = ["app*", "seir_features*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

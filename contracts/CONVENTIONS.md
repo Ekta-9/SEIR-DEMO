@@ -1,4 +1,7 @@
-# SEIR Data Contracts & Conventions — v1.0.0
+# SEIR Data Contracts & Conventions — v1.2.0
+
+> **Changelog** — **1.2.0**: `RiskAssessment.top_features[].contribution` is read for the **predicted class** (rule in §4); `feature` must be an exact column from `seir_features.FEATURE_COLUMNS`; new optional `feature_spec_version`. Features for the risk model are produced **only** by the shared `seir_features.evidence_to_features`.
+> **1.1.0** (additive): `config_reference` items may occur several times per component, so their `evidence_id` also hashes the provenance file locations (rule 4). `CONFIG` `config_reference.value` is the file category (`RUNTIME` / `TEST` / `BUILD`).
 
 **Status:** Proposed by Member 5 (Data/Evolution) — please review and reply with objections by end of Day 2. After that, changes go through a PR that updates this file and the schemas together.
 
@@ -71,7 +74,7 @@ Rules that JSON Schema cannot express (enforced in Python, **please enforce on y
 1. **Unknown is not zero.** If `availability` is `UNAVAILABLE` or `UNKNOWN`, `value` **must be `null`**. If `AVAILABLE`, `value` must be present — and then `0` genuinely means zero.
 2. **Every AVAILABLE item has proof:** non-empty `provenance` or a `window`.
 3. **`evidence_type` must be registered** for its `source` (table below).
-4. **`evidence_id` is deterministic**: `ev_` + first 16 hex chars of SHA-1 over `repo_id|snapshot|component_id|source|evidence_type|as_of|window.start|window.end` (timestamps as UTC ISO-8601). Same inputs → same ID, so re-running an analysis gives identical IDs and explanations can cite them.
+4. **`evidence_id` is deterministic**: `ev_` + first 16 hex chars of SHA-1 over `repo_id|snapshot|component_id|source|evidence_type|as_of|window.start|window.end` (timestamps as UTC ISO-8601). Same inputs → same ID, so re-running an analysis gives identical IDs and explanations can cite them. For **multi-valued** types (currently only `config_reference`) the provenance file locations are appended as `|path:line,path:line` (sorted), so several references of one component get distinct IDs.
 5. **`as_of` is a hard cutoff** — nothing at or after it may influence the value. This is how we avoid data leakage.
 
 ### Evidence-type registry
@@ -93,6 +96,14 @@ Need a new type? Add it to `EVIDENCE_TYPES` in `seir-evidence/app/schema/evidenc
 - **DependencyEdge:** direction is *source depends on target* (`CheckoutController → LegacyPaymentService`). Impact of changing X = everything that can **reach** X.
 - **ChangeCase:** fields above the "ground truth" line are pre-change; `impacted_component_ids`, `fix_commit_shas` and `label` are post-change and **must never be used as model features**. A labelled case must record `label_rule_version`.
 - **RiskAssessment:** `class_scores` sum to 1. Set `is_calibrated: true` **only** if the scores were calibrated; the UI must then say "probability", otherwise "model score".
+- **Reasons (`top_features`) — "predicted class" reading (agreed 2026-09-30):** `contribution` is the attribution (e.g. SHAP value) **for the predicted class `risk_class`**. Positive = pushes the prediction *towards* `risk_class`; negative = pushes *away* from it. `feature` is an exact column name from `seir_features.FEATURE_COLUMNS`. The explainer words it per class:
+
+  | `risk_class` | positive contribution | negative contribution |
+  |---|---|---|
+  | HIGH | "raises the risk" | "lowers the risk" |
+  | MEDIUM | "supports a medium rating" | "argues against a medium rating" |
+  | LOW | "keeps the risk low" | "points to higher risk" |
+- **Model inputs:** always built with `seir_features.evidence_to_features(evidence, action)` (in `seir-evidence/seir_features/`) — the same function the dataset builder uses. Never re-implement it.
 - **Explanation:** every claim and uncertainty cites ≥ 1 `evidence_id`. `validated: true` only after the evidence checker has passed.
 
 ---

@@ -42,6 +42,8 @@ class Settings:
     # Chronological split inside each repository (the rest is the test period).
     train_fraction: float = 0.70
     validation_fraction: float = 0.15
+    # Seed for per-repository case caps (corpus.yaml `max_cases`): reproducible sampling.
+    dataset_sample_seed: int = 42
 
     # --- Network ---------------------------------------------------------------
     git_timeout_seconds: int = 600

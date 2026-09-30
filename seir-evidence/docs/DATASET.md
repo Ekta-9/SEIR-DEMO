@@ -23,6 +23,14 @@ One **change case**: a production Java class that existed before a real historic
 
 Always select features from `manifest.json["feature_columns"]` rather than "all numeric columns" — that is what keeps the forbidden columns out.
 
+Column naming rule: every feature from evidence is `<source>_<evidence_type>` (`git_recent_commit_count`, `config_config_reference_count`, later `static_…`, `runtime_…`), so an ablation run is a filter on the column prefix.
+
+**v2** adds `config_config_reference_count`: the number of places in **runtime** configuration (Spring XML, `application*.yml/properties`, MyBatis mappers, ServiceLoader, `spring.factories`…) that name the class, at the pre-change snapshot. Build-tool and test configuration are not counted. In the two Apache libraries it is **0 for every row** (libraries have no runtime configuration).
+
+**v4 (current, recommended)** — 9 projects, 27,877 cases: commons-lang, commons-io (holdout), commons-collections, commons-text, commons-codec, commons-compress, jsoup, plus the applications `apache/syncope` (capped at 5,000 cases by sampling whole commits) and `apache/shiro`. `macrozheng/mall` was dropped (unreliable labels). Every repository is pinned (`ref` in `corpus.yaml`), so v4 rebuilds identically. Features are produced by the shared `seir_features.evidence_to_features` — use it for predictions too. Full handover: `../member 3 report.md`.
+
+*(Historical)* **v3** added `macrozheng/mall`, a Spring Boot application whose MyBatis XML mappers name Java classes: 1,185 more training/validation/test cases, 226 of them with configuration references, so the configuration ablation has real signal. Training data now spans two repositories (no single repository > 60 %). Caveat: 72 % of mall's commit subjects are "Update X.java", so SZZ finds few bug fixes there (1.9 % of mall cases vs 5–7 % in Apache) — mall's HIGH labels come almost entirely from spread.
+
 `NaN` means **unknown**, not zero (e.g. `git_churn_ratio` when total churn is 0). Tree models (XGBoost/LightGBM) handle NaN natively; for Logistic Regression impute *and* add a missing-indicator column.
 
 ## 3. How labels are made (`labels@1.0`, fixed before any training)

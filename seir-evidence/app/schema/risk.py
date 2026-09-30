@@ -1,4 +1,13 @@
-"""RiskAssessment — output of the ML risk model (Member 3)."""
+"""RiskAssessment — output of the ML risk model (Member 3).
+
+How `top_features[].contribution` is read (agreed 2026-09-30, "predicted class"):
+the attribution is computed for the PREDICTED class (`risk_class`), e.g. the SHAP
+value of that class's score. Positive = pushes the prediction towards
+`risk_class`; negative = pushes away from it. The explainer phrases it by class:
+  HIGH   -> positive "raises the risk",          negative "lowers the risk"
+  LOW    -> positive "keeps the risk low",        negative "points to higher risk"
+  MEDIUM -> positive "supports a medium rating",  negative "argues against a medium rating"
+"""
 
 from pydantic import Field, model_validator
 
@@ -14,9 +23,13 @@ PROBABILITY_SUM_TOLERANCE = 1e-3
 
 
 class FeatureContribution(ContractModel):
-    feature: str = Field(examples=["recent_commit_count"])
+    feature: str = Field(description="Exact feature column name (seir_features.FEATURE_COLUMNS)",
+                         examples=["git_recent_commit_count"])
     value: float | int | bool | str | None
-    contribution: float = Field(description="Signed attribution (e.g. SHAP); positive pushes risk up")
+    contribution: float = Field(
+        description="Signed attribution (e.g. SHAP) for the PREDICTED class: positive pushes the "
+                    "prediction towards risk_class, negative pushes away from it"
+    )
 
 
 class RiskAssessment(ContractModel):
@@ -30,6 +43,10 @@ class RiskAssessment(ContractModel):
     )
     top_features: list[FeatureContribution] = Field(default_factory=list)
     model_version: str = Field(examples=["xgb-risk@0.1.0"])
+    feature_spec_version: str | None = Field(
+        default=None, description="seir_features.FEATURE_SPEC_VERSION the model was trained with",
+        examples=["features@1.0"],
+    )
 
     @model_validator(mode="after")
     def _scores_are_a_distribution(self) -> "RiskAssessment":

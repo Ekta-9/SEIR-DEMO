@@ -13,8 +13,9 @@
       "additionalProperties": false,
       "properties": {
         "feature": {
+          "description": "Exact feature column name (seir_features.FEATURE_COLUMNS)",
           "examples": [
-            "recent_commit_count"
+            "git_recent_commit_count"
           ],
           "title": "Feature",
           "type": "string"
@@ -40,7 +41,7 @@
           "title": "Value"
         },
         "contribution": {
-          "description": "Signed attribution (e.g. SHAP); positive pushes risk up",
+          "description": "Signed attribution (e.g. SHAP) for the PREDICTED class: positive pushes the prediction towards risk_class, negative pushes away from it",
           "title": "Contribution",
           "type": "number"
         }
@@ -110,6 +111,22 @@
       ],
       "title": "Model Version",
       "type": "string"
+    },
+    "feature_spec_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "seir_features.FEATURE_SPEC_VERSION the model was trained with",
+      "examples": [
+        "features@1.0"
+      ],
+      "title": "Feature Spec Version"
     }
   },
   "required": [
@@ -123,5 +140,5 @@
   ],
   "title": "RiskAssessment",
   "type": "object",
-  "$id": "seir/risk_assessment/1.0.0"
+  "$id": "seir/risk_assessment/1.2.0"
 }

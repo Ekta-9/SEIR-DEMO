@@ -1,14 +1,15 @@
 """End-to-end evidence pipeline for one repository snapshot.
 
-Phase 2 covers Git history; later phases add config and runtime collectors
-here, so the web service (Phase 6) only ever calls `analyze_repository`.
+Git history (Phase 2) and configuration (Phase 4); runtime evidence (Phase 5)
+plugs in here too, so the web service (Phase 6) only ever calls `analyze_repository`.
 """
 
 import json
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from app.collectors.config_files import ComponentResolver, ConfigScan, build_config_evidence, package_of, scan_revision
 from app.collectors.git_history import GitHistoryIndex, build_co_change_edges, build_git_evidence
 from app.collectors.git_log import read_history
 from app.config import Settings
@@ -29,6 +30,7 @@ class AnalysisResult:
     components: list[Component]
     evidence: list[EvidenceItem]
     edges: list[DependencyEdge]
+    config_scan: ConfigScan | None = None
     stats: dict = field(default_factory=dict)
 
     def write(self, out_dir: Path) -> None:
@@ -37,6 +39,10 @@ class AnalysisResult:
             payload = [r.model_dump(mode="json") for r in records]
             (out_dir / f"{name}.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
         (out_dir / "stats.json").write_text(json.dumps(self.stats, indent=2, default=str), encoding="utf-8")
+        if self.config_scan:
+            # every reference found, including UNRESOLVED (possibly stale) and EXTERNAL ones
+            refs = [asdict(r) for r in self.config_scan.references]
+            (out_dir / "config_references.json").write_text(json.dumps(refs, indent=2), encoding="utf-8")
 
 
 def snapshot_cutoff(checkout: RepoCheckout, index: GitHistoryIndex) -> datetime:
@@ -64,6 +70,12 @@ def analyze_repository(checkout: RepoCheckout, settings: Settings) -> AnalysisRe
     evidence = build_git_evidence(index, component_ids, checkout.repo_id, checkout.snapshot, as_of, settings)
     edges = build_co_change_edges(index, component_ids, checkout.repo_id, checkout.snapshot, as_of, evidence)
 
+    # Packages of classes that ever existed, so references to deleted classes
+    # are reported as UNRESOLVED (possibly stale) instead of EXTERNAL.
+    resolver = ComponentResolver(component_ids, known_packages={package_of(c) for c in index.component_ids})
+    config_scan = scan_revision(checkout.path, checkout.snapshot, resolver, timeout=settings.git_timeout_seconds)
+    evidence += build_config_evidence(config_scan, component_ids, checkout.repo_id, checkout.snapshot, as_of)
+
     stats = {
         "components": len(components),
         "components_with_history": len(index.component_ids & set(component_ids)),
@@ -71,6 +83,8 @@ def analyze_repository(checkout: RepoCheckout, settings: Settings) -> AnalysisRe
         "bulk_commits": sum(len(c.files) > settings.bulk_commit_file_threshold for c in commits),
         "evidence_items": len(evidence),
         "co_change_edges": len(edges),
+        "config": config_scan.stats(),
         "as_of": as_of.isoformat(),
     }
-    return AnalysisResult(checkout.repo_id, checkout.snapshot, as_of, components, evidence, edges, stats)
+    return AnalysisResult(checkout.repo_id, checkout.snapshot, as_of, components, evidence, edges,
+                          config_scan, stats)

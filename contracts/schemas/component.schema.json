@@ -94,5 +94,5 @@
   ],
   "title": "Component",
   "type": "object",
-  "$id": "seir/component/1.0.0"
+  "$id": "seir/component/1.2.0"
 }

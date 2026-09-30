@@ -121,7 +121,7 @@
       "type": "string"
     },
     "schema_version": {
-      "default": "1.0.0",
+      "default": "1.2.0",
       "title": "Schema Version",
       "type": "string"
     },
@@ -230,5 +230,5 @@
   ],
   "title": "EvidenceItem",
   "type": "object",
-  "$id": "seir/evidence_item/1.0.0"
+  "$id": "seir/evidence_item/1.2.0"
 }

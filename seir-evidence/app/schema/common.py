@@ -10,7 +10,7 @@ from typing import Annotated
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, model_validator
 
-SCHEMA_VERSION = "1.0.0"
+SCHEMA_VERSION = "1.2.0"
 
 # Fully qualified Java class name; nested classes use '$' (JVM convention).
 COMPONENT_ID_PATTERN = r"^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*)*$"

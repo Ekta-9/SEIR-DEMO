@@ -59,6 +59,17 @@ def test_evidence_id_changes_with_cutoff():
     assert early.evidence_id != late.evidence_id
 
 
+def test_multi_valued_evidence_ids_differ_by_location():
+    def config_ref(line: int) -> EvidenceItem:
+        return EvidenceItem.model_validate(git_item(
+            source="CONFIG", evidence_type="config_reference", value="RUNTIME",
+            provenance={"files": [{"path": "src/main/resources/app.xml", "line": line}]},
+        ))
+
+    assert config_ref(10).evidence_id != config_ref(20).evidence_id
+    assert config_ref(10).evidence_id == config_ref(10).evidence_id
+
+
 def test_unknown_is_not_zero():
     with pytest.raises(ValidationError, match="unknown is not zero"):
         EvidenceItem.model_validate(git_item(availability="UNKNOWN", value=0))

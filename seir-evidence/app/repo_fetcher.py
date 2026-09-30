@@ -42,7 +42,10 @@ def fetch_repository(url: str, settings: Settings, ref: str | None = None) -> Re
         run_git(path, "fetch", "--quiet", "--tags", "origin", timeout=timeout)
     else:
         path.parent.mkdir(parents=True, exist_ok=True)
-        run_git(None, "clone", "--quiet", url, str(path), timeout=timeout)
+        # Deep Maven module trees exceed Windows' 260-character path limit
+        # (e.g. apache/dubbo); longpaths lifts it for this clone only.
+        run_git(None, "clone", "--quiet", "--config", "core.longpaths=true", url, str(path), timeout=timeout)
+    run_git(path, "config", "core.longpaths", "true")  # also for clones made before this setting existed
 
     target = ref or run_git(path, "rev-parse", "--abbrev-ref", "origin/HEAD").strip()
     run_git(path, "checkout", "--quiet", "--force", "--detach", target, timeout=timeout)

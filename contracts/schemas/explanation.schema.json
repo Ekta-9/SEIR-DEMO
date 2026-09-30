@@ -97,5 +97,5 @@
   ],
   "title": "Explanation",
   "type": "object",
-  "$id": "seir/explanation/1.0.0"
+  "$id": "seir/explanation/1.2.0"
 }

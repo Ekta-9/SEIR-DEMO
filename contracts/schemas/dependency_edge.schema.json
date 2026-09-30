@@ -67,5 +67,5 @@
   ],
   "title": "DependencyEdge",
   "type": "object",
-  "$id": "seir/dependency_edge/1.0.0"
+  "$id": "seir/dependency_edge/1.2.0"
 }
